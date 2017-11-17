@@ -41,7 +41,7 @@ public class UDPServer implements Runnable
 			
 			//4. Translate the byte data from the request to invoke the method
 			BankUDPInterface requestData = MarshallService.unmarshall(requestPacket.getData());
-			requestData.execute(this.bankServer, this.bankServer.getBranchID());
+			requestData.execute(this.bankServer);
 			
 			//5. Reply
 			byte[] reply = MarshallService.marshall(requestData);

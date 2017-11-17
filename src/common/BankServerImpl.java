@@ -92,4 +92,10 @@ public class BankServerImpl implements BankServerInterface
 
 	}
 
+	public BranchID getBranchID()
+	{
+		// TODO Auto-generated method stub
+		return branchID;
+	}
+
 }
