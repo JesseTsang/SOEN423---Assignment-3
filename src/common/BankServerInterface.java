@@ -8,8 +8,8 @@ import domain.EditRecordField;
 public interface BankServerInterface
 {
 	//Manager Operations
-	public Boolean createAccount(String firstName, String lastName, String address, String phone, String customerID, BranchID branch) throws Exception;
-	public Boolean editRecord(String customerID, EditRecordField fieldName, String newValue) throws Exception;
+	public boolean createAccount(String firstName, String lastName, String address, String phone, String customerID, BranchID branch) throws Exception;
+	public boolean editRecord(String customerID, EditRecordField fieldName, String newValue) throws Exception;
 	public HashMap<String, String> getAccountCount() throws Exception;
 	public boolean transferFund(String customerID1, String customerID2, double amt) throws Exception;
 	
