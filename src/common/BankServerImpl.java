@@ -52,10 +52,7 @@ public class BankServerImpl implements BankServerInterface
 		this.logger = this.initiateLogger();
 		
 		this.logger.info("Server Log: | BankServerImpl Server Instance Creation | Branch: " + branchID + " | Port : " + UDPPort);
-				
-		System.out.println("Server Log: | BankServerImpl Server Instance Creation | Initialization Successed.");
-		System.out.println("Server Log: | BankServerImpl Server Instance Creation | Branch: " + branchID + " | Port : " + UDPPort);
-		
+		System.out.println("Server Log: | BankServerImpl Server Instance Creation | Branch: " + branchID + " | Port : " + UDPPort);	
 	}
 	
 	private Logger initiateLogger() 
@@ -123,7 +120,9 @@ public class BankServerImpl implements BankServerInterface
 				if (client.getCustomerID().equals(customerID))
 				{
 					this.logger.severe("Server Log: | Account Creation Error: Account Already Exists | Customer ID: " + customerID);
-					throw new Exception("Server Error: | Account Creation Error: Account Already Exists | Customer ID: " + customerID);
+					System.out.println("Server Log: | Account Creation Error: Account Already Exists | Customer ID: " + customerID);
+					
+					return false;
 				}
 			}
 			
@@ -137,21 +136,28 @@ public class BankServerImpl implements BankServerInterface
 				clientList.put(key, values);
 				
 				this.logger.info("Server Log: | Account Creation Successful | Customer ID: " + customerID);
+				System.out.println("Server Log: | Account Creation Successful | Customer ID: " + customerID);
 				this.logger.info(newClient.toString());
+				
+				clientCount++;
+				
+				return true;
 			}
 			catch (Exception e)
 			{
 				this.logger.severe("Server Log: | Account Creation Error. | Customer ID: " + customerID + " | " + e.getMessage());
-				throw new Exception(e.getMessage());
+				System.out.println("Server Log: | Account Creation Error. | Customer ID: " + customerID + " | " + e.getMessage());
+				
+				return false;
 			}	
 		}//end if clause ... if not the same branch
 		else
 		{
 			this.logger.severe("Server Log: | Account Creation Error: BranchID Mismatch | Customer ID: " + customerID);
-			throw new RemoteException("Server Error: | Account Creation Error: BranchID Mismatch | Customer ID: " + customerID);		
+			System.out.println("Server Log: | Account Creation Error: BranchID Mismatch | Customer ID: " + customerID);
+			
+			return false;
 		}
-		
-		return true;
 	}
 
 	@Override
@@ -187,6 +193,7 @@ public class BankServerImpl implements BankServerInterface
 						catch (Exception e)
 						{
 							this.logger.severe("Server Log: | Edit Record Error: Invalid Phone Format | Customer ID: " + client.getCustomerID());
+							System.out.println("Server Log: | Edit Record Error: Invalid Phone Format | Customer ID: " + client.getCustomerID());
 							e.printStackTrace();
 							
 							return false;
@@ -204,11 +211,15 @@ public class BankServerImpl implements BankServerInterface
 									 */
 									client.setBranchID(enumList);
 									this.logger.info("Server Log: | Edit Record Log: Branch ID Modified Successful | Customer ID: " + client.getCustomerID());
+									System.out.println("Server Log: | Edit Record Log: Branch ID Modified Successful | Customer ID: " + client.getCustomerID());
+									
 									return true;
 								}
 								else
 								{
 									this.logger.severe("Server Log: | Edit Record Error: Invalid Branch ID | Customer ID: " + client.getCustomerID());
+									System.out.println("Server Log: | Edit Record Error: Invalid Branch ID | Customer ID: " + client.getCustomerID());
+									
 									return false;
 								}
 							}
@@ -216,6 +227,7 @@ public class BankServerImpl implements BankServerInterface
 						catch (Exception e)
 						{
 							this.logger.severe("Server Log: | Edit Record Error: Unknow Branch Error | Customer ID: " + client.getCustomerID());
+							System.out.println("Server Log: | Edit Record Error: Unknow Branch Error | Customer ID: " + client.getCustomerID());
 							
 							return false;
 						}					
@@ -224,7 +236,9 @@ public class BankServerImpl implements BankServerInterface
 			else
 			{
 				this.logger.severe("Server Log: | Record Edit Error: Account Not Found | Customer ID: " + customerID);
-				throw new Exception("Server Log: | Edit Record Error: Account Not Found | Customer ID: " + customerID);
+				System.out.println("Server Log: | Edit Record Error: Account Not Found | Customer ID: " + customerID);
+				
+				return false;
 			}
 		}
 				
@@ -246,44 +260,155 @@ public class BankServerImpl implements BankServerInterface
 	}
 
 	@Override
-	public synchronized void deposit(String customerID, double amt) throws Exception
+	public synchronized boolean deposit(String customerID, double amount) throws Exception
 	{
-		// TODO Auto-generated method stub
-
+		//0. Preliminary Check
+		if (amount <= 0)
+		{
+			this.logger.info("Server Log: | Deposit Error: Attempted to deposit incorrect amount. | Amount: " + amount + " | Customer ID: " + customerID);
+			System.out.println("Server Log: | Deposit Error: Attempted to deposit incorrect amount. | Amount: " + amount + " | Customer ID: " + customerID);
+			
+			return false;
+		}
+		
+		//1. Verify the customerID is valid.
+		try
+		{
+			//Maybe move the verification process to a separate method
+			String key = Character.toString((char)customerID.charAt(CLIENT_NAME_INI_POS));
+			ArrayList<Client> values = clientList.get(key);
+			
+			for (Client client : values)
+			{
+				if (client.getCustomerID().equals(customerID))
+				{
+					client.deposit(amount);
+					double newBalance = client.getBalance();
+					this.logger.info("Server Log: | Deposit Log: | Deposit: " + amount + " | Balance: " + newBalance + " | Customer ID: " + customerID);
+					System.out.println("Server Log: | Deposit Log: | Deposit: " + amount + " | Balance: " + newBalance + " | Customer ID: " + customerID);
+						
+					return true;
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			this.logger.severe("Server Log: | Deposit Error: | Unable to locate account. | Customer ID: " + customerID);
+			System.out.println("Server Log: | Deposit Error: | Unable to locate account. | Customer ID: " + customerID);
+			
+			return false;
+		}
+		
+		return false;
 	}
 
 	@Override
-	public synchronized void withdraw(String customerID, double amt) throws Exception
+	public synchronized boolean withdraw(String customerID, double amount) throws Exception
 	{
-		// TODO Auto-generated method stub
-
+		//0. Preliminary Check
+		if (amount <= 0)
+		{
+			this.logger.info("Server Log: | Withdrawl Error: Attempted to withdraw incorrect amount. | Amount: " + amount + " | Customer ID: " + customerID);
+			System.out.println("Server Log: | Withdrawl Error: Attempted to withdraw incorrect amount. | Amount: " + amount + " | Customer ID: " + customerID);
+			
+			return false;
+		}
+		
+		//1. Verify the customerID is valid.
+		try
+		{
+			//Maybe move the verification process to a separate method
+			String key = Character.toString((char)customerID.charAt(CLIENT_NAME_INI_POS));
+			ArrayList<Client> values = clientList.get(key);
+			
+			for (Client client : values)
+			{
+				if (client.getCustomerID().equals(customerID))
+				{
+					double oldBalance = client.getBalance();
+					double newBalance = oldBalance - amount;				
+					
+					if (newBalance < 0 )
+					{				
+						this.logger.severe("Server Log: | Withdrawl Error: Attempted to withdraw more than current balance. | Amount: " 
+								+ amount + " | Customer Balance: " + oldBalance + " | Customer ID: " + customerID);
+						System.out.println("Server Log: | Withdrawl Error: Attempted to withdraw more than current balance. | Amount: " 
+								+ amount + " | Customer Balance: " + oldBalance + " | Customer ID: " + customerID);
+						
+						return false;		
+					}
+					else
+					{
+						client.withdraw(amount);
+						
+						this.logger.info("Server Log: | Withdrawl Log: | Withdrawl: " + amount + " | Balance: " + newBalance + " | Customer ID: " + customerID);
+						System.out.println("Server Log: | Withdrawl Log: | Withdrawl: " + amount + " | Balance: " + newBalance + " | Customer ID: " + customerID);
+						
+						return true;
+					}					
+				}
+			}
+		}
+		catch (Exception e) //Cannot find client
+		{
+			this.logger.severe("Server Log: | Withdrawl Error: | Unable to locate account. | Customer ID: " + customerID);
+			System.out.println("Server Log: | Withdrawl Error: | Unable to locate account. | Customer ID: " + customerID);
+			
+			return false;
+		}
+		
+		return false;
 	}
 
 	@Override
 	public synchronized double getBalance(String customerID) throws Exception
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		double customerBalance = 0;
+		
+		//1. Verify the customerID is valid.
+		try
+		{
+			//Maybe move the verification process to a separate method
+			String key = Character.toString((char)customerID.charAt(CLIENT_NAME_INI_POS));
+			
+			ArrayList<Client> values = clientList.get(key);
+					
+			for (Client client : values)
+			{
+				if (client.getCustomerID().equals(customerID))
+				{
+					customerBalance = client.getBalance();
+							
+					this.logger.info("Server Log: | Balance Log: | Balance: " + customerBalance + " | Customer ID: " + customerID);
+					System.out.println("Server Log: | Balance Log: | Balance: " + customerBalance + " | Customer ID: " + customerID);
+					
+					return customerBalance;
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			this.logger.severe("Server Log: | Withdrawl Error: | Unable to locate account. | Customer ID: " + customerID);
+			throw new Exception("Server Log: | Withdrawl Error: | Unable to locate account. | Customer ID: " + customerID);
+		}
+		
+		return customerBalance;
 	}
 
 	@Override
-	public synchronized int getLocalAccountCount() throws Exception
+	public synchronized int getLocalAccountCount()
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return clientCount;
 	}
 
 	@Override
 	public void shutdown()
 	{
-		// TODO Auto-generated method stub
-
+		this.UDPServer.stop();
 	}
 
 	public BranchID getBranchID()
 	{
-		// TODO Auto-generated method stub
 		return branchID;
 	}
-
 }

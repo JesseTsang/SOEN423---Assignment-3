@@ -14,12 +14,12 @@ public interface BankServerInterface
 	public boolean transferFund(String customerID1, String customerID2, double amt) throws Exception;
 	
 	//Core Operations
-	public void deposit(String customerID, double amt) throws Exception;
-	public void withdraw(String customerID, double amt) throws Exception;
+	public boolean deposit(String customerID, double amt) throws Exception;
+	public boolean withdraw(String customerID, double amt) throws Exception;
 	public double getBalance(String customerID) throws Exception;
 	
 	//Misc Operations
-	public int getLocalAccountCount() throws Exception;
+	public int getLocalAccountCount();
 	
 	//Server Operations
 	public void shutdown();
