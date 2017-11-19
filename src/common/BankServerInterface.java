@@ -10,7 +10,7 @@ public interface BankServerInterface
 	//Manager Operations
 	public boolean createAccount(String firstName, String lastName, String address, String phone, String customerID, BranchID branch) throws Exception;
 	public boolean editRecord(String customerID, EditRecordField fieldName, String newValue) throws Exception;
-	public HashMap<String, String> getAccountCount() throws Exception;
+	public HashMap<String, Integer> getAccountCount() throws Exception;
 	public boolean transferFund(String customerID1, String customerID2, double amt) throws Exception;
 	
 	//Core Operations

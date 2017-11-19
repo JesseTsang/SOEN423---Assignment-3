@@ -2,40 +2,40 @@ package domain;
 
 public class Server
 {
-	private int portNum;
-	private String ipAddress;
+	private String host;
+	private int port;
 	
-	public Server(String ip, int port)
-	{
-		this.portNum = port;
-		this.ipAddress = ip;
+	public Server(String host, int port)
+	{		
+		this.host = host;
+		this.port = port;
 	}
 	
 	/********** Getters & Setters & toString() **********/
 	
-	public int getPortNum()
+	public int getPort()
 	{
-		return portNum;
+		return port;
 	}
 
-	public void setPortNum(int portNum)
+	public void setPort(int port)
 	{
-		this.portNum = portNum;
+		this.port = port;
 	}
 
-	public String getIpAddress()
+	public String getHost()
 	{
-		return ipAddress;
+		return host;
 	}
 
-	public void setIpAddress(String ipAddress)
+	public void setHost(String host)
 	{
-		this.ipAddress = ipAddress;
+		this.host = host;
 	}
 
 	@Override
 	public String toString()
 	{
-		return "Server [portNum=" + portNum + ", ipAddress=" + ipAddress + "]";
+		return "Server [Host =" + host + ", Port =" + port + "]";
 	}
 }
