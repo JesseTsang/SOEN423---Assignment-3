@@ -3,20 +3,30 @@ package common;
 import java.util.HashMap;
 import java.util.Hashtable;
 
+import client.BankServerDriver;
 import domain.BranchID;
 import domain.EditRecordField;
-import domain.Server;
+
 
 public class BankServerWS implements BankServerWSInterface
 {
 	static Hashtable<String, BankServerImpl> branchDirectory = new Hashtable<String, BankServerImpl>();
 	
 	//Constructor
-	public BankServerWS(BranchID branchID, String host, int port, HashMap<String, Server> serversDir)
+	public BankServerWS()
 	{
-		branchDirectory.put(branchID.toString(), new BankServerImpl(branchID, host, port, serversDir));
-		
-		System.out.println("WS Server Log: | WS Instance Creation | Branch: " + branchID + " | Port : " + port);	
+		BankServerDriver newWS = new BankServerDriver();
+		//HashMap == not synchronized
+		//HashTable == synchronized
+		HashMap <String, BankServerImpl> serversList = newWS.getServersList();
+	
+		for(String serverName : serversList.keySet())
+		{
+			BankServerImpl server = serversList.get(serverName);
+			branchDirectory.put(serverName, server);
+			
+			System.out.println("WS Server Log: | WS Instance Creation | Branch: " + server.getBranchID().toString() + " | Port : " + server.getUDPPort());	
+		}	
 	}
 
 	@Override
@@ -98,8 +108,9 @@ public class BankServerWS implements BankServerWSInterface
 	}
 
 	@Override
-	public boolean deposit(BranchID branch, String customerID, double amount) throws Exception
+	public boolean deposit(BranchID branchID, String customerID, double amount) throws Exception
 	{
+		String branch = branchID.toString();
 		boolean result = branchDirectory.get(branch).deposit(customerID, amount);
 		
 		if(result == true)
@@ -121,7 +132,7 @@ public class BankServerWS implements BankServerWSInterface
 	@Override
 	public boolean withdraw(BranchID branch, String customerID, double amount) throws Exception
 	{
-		boolean result = branchDirectory.get(branch).withdraw(customerID, amount);
+		boolean result = branchDirectory.get(branch.toString()).withdraw(customerID, amount);
 		
 		if(result == true)
 		{
@@ -146,7 +157,7 @@ public class BankServerWS implements BankServerWSInterface
 		
 		try
 		{
-			result = branchDirectory.get(branch).getBalance(customerID);
+			result = branchDirectory.get(branch.toString()).getBalance(customerID);
 		}
 		catch (Exception e)
 		{
@@ -160,6 +171,6 @@ public class BankServerWS implements BankServerWSInterface
 	@Override
 	public void shutdown(BranchID branch)
 	{
-		branchDirectory.get(branch).shutdown();
+		branchDirectory.get(branch.toString()).shutdown();
 	}
 }

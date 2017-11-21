@@ -554,4 +554,9 @@ public class BankServerImpl implements BankServerInterface
 	{
 		return branchID;
 	}
+
+	public int getUDPPort()
+	{
+		return UDPPort;
+	}
 }
