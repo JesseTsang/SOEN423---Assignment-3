@@ -8,7 +8,6 @@ import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
-import domain.BranchID;
 
 //This client will make the UDP call/request for the interbank operations
 public class UDPClient
@@ -18,11 +17,11 @@ public class UDPClient
 	private BankUDPInterface request;
 	private BankUDPInterface response;
 	
-	private BranchID branchID;
+	private String branchID;
 	Logger logger = null;
 	
 	
-	public UDPClient(String hostName, int portNum, BranchID branchID)
+	public UDPClient(String hostName, int portNum, String branchID)
 	{
 		this.UDPHost = hostName;
 		this.UDPPort = portNum;

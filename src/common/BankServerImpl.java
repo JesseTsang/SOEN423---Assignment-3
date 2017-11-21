@@ -3,25 +3,23 @@ package common;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
-import domain.BranchID;
 import domain.Client;
-import domain.EditRecordField;
 import domain.Server;
 import udp.BankUDP;
 import udp.BankUDPInterface;
 import udp.UDPClient;
 import udp.UDPServer;
 
-
 public class BankServerImpl implements BankServerInterface
 {
 	//Variable for each separate bank server
-	private BranchID branchID;
+	private String branchID;
 	private String UDPHost;
 	private int UDPPort;
 	private Logger logger = null;
@@ -30,7 +28,7 @@ public class BankServerImpl implements BankServerInterface
 	private UDPServer UDPServer;
 	
 	//Holds other servers' addresses : ["ServerName", "hostName:portNumber"]
-	HashMap<String, Server> serversList = new HashMap<String, Server>();
+	Map<String, Server> serversList = new HashMap<String, Server>();
 	
 	private int clientCount;
 	private Map<String, ArrayList<Client>> clientList = new HashMap<String, ArrayList<Client>>();
@@ -38,7 +36,7 @@ public class BankServerImpl implements BankServerInterface
 	private static final int CLIENT_NAME_INI_POS = 3;
 	
 	//Constructor
-	public BankServerImpl(BranchID branchID, String host, int port, HashMap<String, Server> serversDir)
+	public BankServerImpl(String branchID, String host, int port, Map<String, Server> serversDir)
 	{
 		this.branchID = branchID;
 		this.UDPHost = host;
@@ -93,12 +91,12 @@ public class BankServerImpl implements BankServerInterface
 
 	@Override
 	public synchronized boolean createAccount(String firstName, String lastName, String address, String phone, String customerID,
-	        BranchID branchID) throws Exception
+			String branchID) throws Exception
 	{
 		this.logger.info("Initiating user account creation for " + firstName + " " + lastName);
 		
 		//If the user IS at the right branch ... we start the operation.
-		if (this.branchID == branchID)
+		if (this.branchID.equals(branchID))
 		{
 			//Each character will be a key, each key will starts with 10 buckets.
 			String key = Character.toString((char)customerID.charAt(CLIENT_NAME_INI_POS));
@@ -162,7 +160,7 @@ public class BankServerImpl implements BankServerInterface
 	}
 
 	@Override
-	public synchronized boolean editRecord(String customerID, EditRecordField fieldName, String newValue) throws Exception
+	public synchronized boolean editRecord(String customerID, String fieldName, String newValue) throws Exception
 	{
 		//1. Check if such client exist.
 		String key = Character.toString((char)customerID.charAt(CLIENT_NAME_INI_POS));
@@ -175,12 +173,12 @@ public class BankServerImpl implements BankServerInterface
 			{		
 				switch(fieldName)
 				{
-					case address:
+					case "address":
 						client.setAddress(newValue);
 						this.logger.info("Server Log: | Edit Record Log: Address Record Modified Successful | Customer ID: " + client.getCustomerID());
 						return true;
 					
-					case phone:
+					case "phone":
 						try
 						{
 							if(client.verifyPhoneNumber(newValue))
@@ -200,16 +198,19 @@ public class BankServerImpl implements BankServerInterface
 							return false;
 						}
 					
-					case branch:
-						try
-						{
+					case "branch":
+						client.setBranchID(newValue);
+						this.logger.info("Server Log: | Edit Record Log: Branch ID Modified Successful | Customer ID: " + client.getCustomerID());
+						return true;
+						/*try
+						{				
 							for(BranchID enumList : BranchID.values())
 							{
 								if(enumList.name().equalsIgnoreCase(newValue))
 								{
-									/*
+									
 									 * Todo: Maybe we should also modify the customer ID here because their ID has BranchID as part of their ID.
-									 */
+									 
 									client.setBranchID(enumList);
 									this.logger.info("Server Log: | Edit Record Log: Branch ID Modified Successful | Customer ID: " + client.getCustomerID());
 									System.out.println("Server Log: | Edit Record Log: Branch ID Modified Successful | Customer ID: " + client.getCustomerID());
@@ -231,7 +232,7 @@ public class BankServerImpl implements BankServerInterface
 							System.out.println("Server Log: | Edit Record Error: Unknow Branch Error | Customer ID: " + client.getCustomerID());
 							
 							return false;
-						}					
+						}*/					
 				}//end switch statements
 			}//end if clause (customer found)
 			else
@@ -247,10 +248,10 @@ public class BankServerImpl implements BankServerInterface
 	}
 
 	@Override
-	public synchronized HashMap<String, Integer> getAccountCount() throws Exception
+	public synchronized Hashtable<String, Integer> getAccountCount() throws Exception
 	{
 		int values;
-		HashMap<String, Integer> totalActCount = new HashMap<String, Integer>();
+		Hashtable<String, Integer> totalActCount = new Hashtable<String, Integer>();
 		
 		for(String branch : serversList.keySet())
 		{
@@ -268,7 +269,7 @@ public class BankServerImpl implements BankServerInterface
 			int port = remoteUDP.getPort();
 			
 			//4. Prepare UDP Request
-			UDPClient client = new UDPClient(host, port, BranchID.valueOf(branch));
+			UDPClient client = new UDPClient(host, port, branch);
 			BankUDPInterface accountCountReq = new BankUDP();			
 			client.send(accountCountReq);
 			
@@ -342,7 +343,7 @@ public class BankServerImpl implements BankServerInterface
 							int portDest = serverDetail.getPort();
 							
 							//3.3 Create an UDPClient and prepare the request.
-							UDPClient requestClient = new UDPClient(hostDest, portDest, BranchID.valueOf(remoteBranchID));
+							UDPClient requestClient = new UDPClient(hostDest, portDest, remoteBranchID);
 							
 							BankUDPInterface transferReq = new BankUDP(sourceID, destID, amount);
 							requestClient.send(transferReq);
@@ -550,7 +551,7 @@ public class BankServerImpl implements BankServerInterface
 		this.UDPServer.stop();
 	}
 
-	public BranchID getBranchID()
+	public String getBranchID()
 	{
 		return branchID;
 	}

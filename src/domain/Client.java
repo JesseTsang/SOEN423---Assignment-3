@@ -14,7 +14,7 @@ public class Client
 	private String phoneNumber;
 	private String customerID;
 	
-	private BranchID branchID;
+	private String branchID;
 	private double balance;
 	private String filename;
 	private Logger logger = null;
@@ -23,7 +23,7 @@ public class Client
 	private static Pattern ACCOUNT_NUMER_PATTERN = java.util.regex.Pattern.compile("^(BC|MB|NB|QC)(C|M)[a-zA-Z](\\d{4})$");
 	private static Pattern PHONE_PATTERN = java.util.regex.Pattern.compile("^\\d{3}-\\d{3}-\\d{4}$");
 	
-	public Client(String firstName, String lastName, String address, String phoneNumber, String customerID, BranchID branchID) 
+	public Client(String firstName, String lastName, String address, String phoneNumber, String customerID, String branchID) 
 			throws Exception
 	{
 		//If pass verification test ...
@@ -188,12 +188,12 @@ public class Client
 		this.phoneNumber = phoneNumber;
 	}
 
-	public BranchID getBranchID()
+	public String getBranchID()
 	{
 		return branchID;
 	}
 
-	public void setBranchID(BranchID branchID)
+	public void setBranchID(String branchID)
 	{
 		this.branchID = branchID;
 	}

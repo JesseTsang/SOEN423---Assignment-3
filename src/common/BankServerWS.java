@@ -1,12 +1,19 @@
 package common;
 
-import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
+
+import javax.jws.WebService;
 
 import client.BankServerDriver;
-import domain.BranchID;
-import domain.EditRecordField;
 
+
+@WebService(
+		name = "BankServerWS",
+		serviceName = "BankServerWS",
+		portName = "BankServerWS",
+		targetNamespace = "http://localhost/BankWS"
+		)
 
 public class BankServerWS implements BankServerWSInterface
 {
@@ -18,22 +25,22 @@ public class BankServerWS implements BankServerWSInterface
 		BankServerDriver newWS = new BankServerDriver();
 		//HashMap == not synchronized
 		//HashTable == synchronized
-		HashMap <String, BankServerImpl> serversList = newWS.getServersList();
+		Map <String, BankServerImpl> serversList = newWS.getServersList();
 	
 		for(String serverName : serversList.keySet())
 		{
 			BankServerImpl server = serversList.get(serverName);
 			branchDirectory.put(serverName, server);
 			
-			System.out.println("WS Server Log: | WS Instance Creation | Branch: " + server.getBranchID().toString() + " | Port : " + server.getUDPPort());	
+			System.out.println("WS Server Log: | WS Instance Creation | Branch: " + server.getBranchID() + " | Port : " + server.getUDPPort());	
 		}	
 	}
 
 	@Override
 	public boolean createAccount(String firstName, String lastName, String address, String phone, String customerID,
-	        BranchID branchID) throws Exception
+			String branchID) throws Exception
 	{
-		boolean result = branchDirectory.get(branchID.toString()).createAccount(firstName, lastName, address, phone, customerID, branchID);
+		boolean result = branchDirectory.get(branchID).createAccount(firstName, lastName, address, phone, customerID, branchID);
 		
 		if(result == true)
 		{
@@ -50,10 +57,10 @@ public class BankServerWS implements BankServerWSInterface
 	}
 
 	@Override
-	public boolean editRecord(BranchID branchID, String customerID, EditRecordField fieldName, String newValue)
+	public boolean editRecord(String branchID, String customerID, String fieldName, String newValue)
 	        throws Exception
 	{
-		boolean result = branchDirectory.get(branchID.toString()).editRecord(customerID, fieldName, newValue);
+		boolean result = branchDirectory.get(branchID).editRecord(customerID, fieldName, newValue);
 		
 		if(result == true)
 		{
@@ -70,9 +77,9 @@ public class BankServerWS implements BankServerWSInterface
 	}
 
 	@Override
-	public HashMap<String, Integer> getAccountCount() throws Exception
+	public Hashtable<String, Integer> getAccountCount() throws Exception
 	{
-		HashMap<String, Integer> totalActCount = new HashMap<String, Integer>();
+		Hashtable<String, Integer> totalActCount = new Hashtable<String, Integer>();
 		String branchID = "";
 		
 		for(String branch : branchDirectory.keySet())
@@ -108,68 +115,67 @@ public class BankServerWS implements BankServerWSInterface
 	}
 
 	@Override
-	public boolean deposit(BranchID branchID, String customerID, double amount) throws Exception
+	public boolean deposit(String branchID, String customerID, double amount) throws Exception
 	{
-		String branch = branchID.toString();
-		boolean result = branchDirectory.get(branch).deposit(customerID, amount);
+		boolean result = branchDirectory.get(branchID).deposit(customerID, amount);
 		
 		if(result == true)
 		{
 			System.out.println("WS Server Log: | Deposit Log: | Deposit Successfully | Client ID: " + customerID 
-	                  + " | Branch ID: " + branch.toString() + " | Amount: $" + amount);
+	                  + " | Branch ID: " + branchID + " | Amount: $" + amount);
 			
 			return true;
 		}
 		else
 		{
 			System.out.println("WS Server Log: | Deposit Log: | Deposit Unsuccessfully | Client ID: " + customerID 
-	                  + " | Branch ID: " + branch.toString() + " | Amount: $" + amount);
+	                  + " | Branch ID: " + branchID + " | Amount: $" + amount);
 			
 			return false;
 		}
 	}
 
 	@Override
-	public boolean withdraw(BranchID branch, String customerID, double amount) throws Exception
+	public boolean withdraw(String branchID, String customerID, double amount) throws Exception
 	{
-		boolean result = branchDirectory.get(branch.toString()).withdraw(customerID, amount);
+		boolean result = branchDirectory.get(branchID).withdraw(customerID, amount);
 		
 		if(result == true)
 		{
 			System.out.println("WS Server Log: | Withdraw Log: | Withdraw Successfully | Client ID: " + customerID 
-	                  + " | Branch ID: " + branch.toString() + " | Amount: $" + amount);
+	                  + " | Branch ID: " + branchID + " | Amount: $" + amount);
 			
 			return true;
 		}
 		else
 		{
 			System.out.println("WS Server Log: | Withdraw Log: | Withdraw Unsuccessfully | Client ID: " + customerID 
-	                  + " | Branch ID: " + branch.toString() + " | Amount: $" + amount);
+	                  + " | Branch ID: " + branchID + " | Amount: $" + amount);
 			
 			return false;
 		}
 	}
 
 	@Override
-	public double getBalance(BranchID branch, String customerID) throws Exception
+	public double getBalance(String branchID, String customerID) throws Exception
 	{		
 		double result = 0; 
 		
 		try
 		{
-			result = branchDirectory.get(branch.toString()).getBalance(customerID);
+			result = branchDirectory.get(branchID).getBalance(customerID);
 		}
 		catch (Exception e)
 		{
-			System.out.println("WS Server Log: | Withdrawl Error: | Unable to locate account. | Customer ID: " + customerID + " | Branch ID: " + branch.toString());
-			throw new Exception("WS Server Log: | Withdrawl Error: | Unable to locate account. | Customer ID: " + customerID + " | Branch ID: " + branch.toString());
+			System.out.println("WS Server Log: | Withdrawl Error: | Unable to locate account. | Customer ID: " + customerID + " | Branch ID: " + branchID);
+			throw new Exception("WS Server Log: | Withdrawl Error: | Unable to locate account. | Customer ID: " + customerID + " | Branch ID: " + branchID);
 		}
 
 		return result;
 	}
 
 	@Override
-	public void shutdown(BranchID branch)
+	public void shutdown(String branch)
 	{
 		branchDirectory.get(branch.toString()).shutdown();
 	}

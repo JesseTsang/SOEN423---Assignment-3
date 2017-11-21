@@ -1,16 +1,17 @@
 package client;
 
 import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Map;
 
 import common.BankServerImpl;
-import common.BankServerWS;
 import domain.BranchID;
 import domain.Server;
 
 public class BankServerDriver
 {
-	HashMap<String, Server> serversDetails = new HashMap<String, Server>();
-	HashMap<String, BankServerImpl> serversList = new HashMap<String, BankServerImpl>();
+	Map<String, Server> serversDetails = new HashMap<String, Server>();
+	Hashtable<String, BankServerImpl> serversList = new Hashtable<String, BankServerImpl>();
 	
 	public BankServerDriver()
 	{	
@@ -35,10 +36,10 @@ public class BankServerDriver
 		serversDetails.put(nb.toString(), new Server(nbHost, nbPort));
 		serversDetails.put(qc.toString(), new Server(qcHost, qcPort));
 		
-		BankServerImpl BCServer = new BankServerImpl(bc, bcHost, bcPort, serversDetails);
-		BankServerImpl MBServer = new BankServerImpl(mb, mbHost, mbPort, serversDetails);
-		BankServerImpl NBServer = new BankServerImpl(nb, nbHost, nbPort, serversDetails);
-		BankServerImpl QCServer = new BankServerImpl(qc, qcHost, qcPort, serversDetails);
+		BankServerImpl BCServer = new BankServerImpl(bc.toString(), bcHost, bcPort, serversDetails);
+		BankServerImpl MBServer = new BankServerImpl(mb.toString(), mbHost, mbPort, serversDetails);
+		BankServerImpl NBServer = new BankServerImpl(nb.toString(), nbHost, nbPort, serversDetails);
+		BankServerImpl QCServer = new BankServerImpl(qc.toString(), qcHost, qcPort, serversDetails);
 		
 		serversList.put(bc.toString(), BCServer);
 		serversList.put(mb.toString(), MBServer);
@@ -47,7 +48,7 @@ public class BankServerDriver
 		
 	}
 
-	public HashMap<String, BankServerImpl> getServersList()
+	public Map<String, BankServerImpl> getServersList()
 	{
 		return serversList;
 	}
