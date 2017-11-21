@@ -76,7 +76,7 @@ public class BankServerWS implements BankServerWSInterface
 		}
 	}
 
-	@Override
+	/*@Override
 	public Hashtable<String, Integer> getAccountCount() throws Exception
 	{
 		Hashtable<String, Integer> totalActCount = new Hashtable<String, Integer>();
@@ -90,7 +90,7 @@ public class BankServerWS implements BankServerWSInterface
 		totalActCount = branchDirectory.get(branchID).getAccountCount();
 		
 		return totalActCount;
-	}
+	}*/
 
 	@Override
 	public boolean transferFund(String sourceID, String destID, double amount) throws Exception
